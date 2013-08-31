@@ -1,0 +1,7 @@
+Usage:
+
+var hot = require('hot');
+hot.require('some-module',function (module) {
+    module.get_the_thing();
+    console.log("Continuation passing style is annoying.");
+    });
