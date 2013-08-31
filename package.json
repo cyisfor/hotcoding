@@ -1,6 +1,10 @@
 {
     "name": "hotcoding",
-    "version": "0.0.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cyisfor/hotcoding"
+    },
+    "version": "0.1.0",
     "description": "Hot coding. Modules reload when files change, can manually reload. Uses custom require.",
     "license": "WTFPL",
     "files": ["hot.js","testhot.js","README"],
