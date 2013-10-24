@@ -1,5 +1,6 @@
 var hot = require('hot');
 hot.require('testok',function (module) {
+    console.log(module);
     console.log("Module testok loaded! "+module.time);
     console.log("same thing now: "+hot.require('testok').time);
     hot.reload('testok', function (module) {
@@ -11,7 +12,7 @@ hot.require('testok',function (module) {
             }
             try {
                 hot.require('nothingasdpuhogcdhi',function (module) {
-                    console.log("We'll never get here. "+module);
+                    console.log("module is an error:",module instanceof Error,module);
                     process.exit(0);
                 });
             } catch(e) {

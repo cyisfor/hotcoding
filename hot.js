@@ -27,24 +27,41 @@ function reload(name,next) {
     }
 }
 
-function hotrequire(name,next) {
+function hotrequire(names,next) {
+    if (!Array.isArray(names)) {
+        names = [names];
+    }
+    var modules = [];
     var guy = module.parent;
     if (guy) {
         guy = guy.id;
-        var guys = requires[name];
-        if(guys) {
-            guys.add(guy);
-        } else {
-            requires[name] = new ss.StringSet([guy]);
-        }
     }
-    return hotrequire2(name,next);
+    if(!next) {
+        return names.map(function (name) {cache[name]})
+    }
+
+    function iternext(i) {
+        if (i >= names.length) {
+            next.apply(next,modules);
+            return;
+        }
+        var name = names[i];
+        if (guy) {
+            var guys = requires[name];
+            if(guys) {
+                guys.add(guy);
+            } else {
+                requires[name] = new ss.StringSet([guy]);
+            }
+        }
+        hotrequire2(name,function(module) { modules.push(module); iternext(i+1) });
+    }
+    return iternext(0);
 }
 
 function hotrequire2(name,next) {
     if(cache[name]) {
-        if(next) next(cache[name]);
-        else return cache[name];
+        next(cache[name]);
     } else {
         var vm = require('vm');
         function getPath(next) {
@@ -100,11 +117,19 @@ function hotrequire2(name,next) {
                     fs.readFile(path,function (err, code) {
                         if(err) next(err);
                         module = {exports: Object(null), console: console}
-                        result = vm.runInNewContext(code,module,path);
+                        try { 
+                            result = vm.runInNewContext(code,module,path);
+                        } catch(err) {
+                            module.error = err;
+                        }
                         cache[name] = module;
                         console.log(name+ " compiled.");
                         // THIS IS THE FINAL NEXT
-                        if(next) next(module);
+                        if (module.error) {
+                            next(module.error);
+                        } else {
+                            next(module.exports);
+                        }
                     });
                 } else {
                     next(new Error("test failed on "+name));
